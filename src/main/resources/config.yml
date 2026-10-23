@@ -61,6 +61,8 @@ visuals:
 storage:
   auto-save-interval: 5
 
+# Set first-open or already-looted to "" to turn that message off.
+# already-looted only shows when the player's copy of the chest is empty.
 messages:
   first-open: "&aThis chest has unique loot just for you!"
   already-looted: "&7You have already looted this chest."

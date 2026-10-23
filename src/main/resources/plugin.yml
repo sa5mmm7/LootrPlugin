@@ -6,6 +6,7 @@ description: Per-player unique loot from structure chests with shop plugin compa
 authors: [FeTaL, sa5mmm7]
 
 softdepend: 
+  - GriefPrevention
   - QuickShop-Hikari
   - QuickShop
   - ChestShop

@@ -2,12 +2,14 @@ package com.fetal.lootr;
 
 import com.fetal.lootr.commands.LootrCommand;
 import com.fetal.lootr.listeners.ChestListener;
+import com.fetal.lootr.listeners.GriefPreventionHook;
 import com.fetal.lootr.listeners.ChestProtectionListener;
 import com.fetal.lootr.manager.LootManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -19,6 +21,7 @@ public class LootrPlugin extends JavaPlugin {
 
     private static LootrPlugin instance;
     private LootManager lootManager;
+    private ChestListener chestListener;
     private BukkitTask autoSaveTask;
     private BukkitTask particleTask;
 
@@ -81,8 +84,9 @@ public class LootrPlugin extends JavaPlugin {
         // Load config
         loadConfigValues();
 
-        // Wait for QuickShop if configured
-        if (waitForQuickShop > 0 && !Bukkit.getPluginManager().isPluginEnabled("QuickShop-Hikari")) {
+        // Wait for QuickShop if configured, but only when it's installed and hasn't enabled yet
+        Plugin quickShop = Bukkit.getPluginManager().getPlugin("QuickShop-Hikari");
+        if (waitForQuickShop > 0 && quickShop != null && !quickShop.isEnabled()) {
             getLogger().info("Waiting for QuickShop-Hikari to load...");
             Bukkit.getScheduler().runTaskLater(this, () -> {
                 initializePlugin();
@@ -101,8 +105,9 @@ public class LootrPlugin extends JavaPlugin {
         lootManager.loadData();
 
         // Register listeners
-        ChestListener chestListener = new ChestListener(this, lootManager);
+        chestListener = new ChestListener(this, lootManager);
         getServer().getPluginManager().registerEvents(chestListener, this);
+        GriefPreventionHook.register(this, chestListener);
         getServer().getPluginManager().registerEvents(new ChestProtectionListener(this, lootManager), this);
 
         // Register commands
@@ -138,6 +143,7 @@ public class LootrPlugin extends JavaPlugin {
     public void onDisable() {
         if (autoSaveTask != null) autoSaveTask.cancel();
         if (particleTask != null) particleTask.cancel();
+        if (chestListener != null) chestListener.closeAllLids();
 
         if (lootManager != null) {
             lootManager.saveAllData();
@@ -227,7 +233,7 @@ public class LootrPlugin extends JavaPlugin {
 
     private void printBanner() {
         getLogger().info("╔═══════════════════════════════════════╗");
-        getLogger().info("║          LootrPlugin v1.2.5" + getDescription().getVersion() + "      ║");
+        getLogger().info("║          LootrPlugin v" + getDescription().getVersion() + "            ║");
         getLogger().info("║            Author: FeTaL              ║");
         getLogger().info("╠═══════════════════════════════════════╣");
         getLogger().info("║                                       ║");
