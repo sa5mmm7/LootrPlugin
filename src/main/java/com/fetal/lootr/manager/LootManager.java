@@ -113,6 +113,20 @@ public class LootManager {
         return registeredChests.containsKey(key);
     }
 
+    public boolean setChestLootTable(String key, String lootTableKey) {
+        ChestData data = registeredChests.get(key);
+        if (data == null) return false;
+        registeredChests.put(key, new ChestData(lootTableKey, data.seed, data.invSize));
+        return true;
+    }
+
+    // Returns the normalized key (e.g. "minecraft:chests/simple_dungeon") or null if no such table exists
+    public String resolveLootTableKey(String input) {
+        NamespacedKey key = NamespacedKey.fromString(input.toLowerCase());
+        if (key == null || Bukkit.getLootTable(key) == null) return null;
+        return key.toString();
+    }
+
     // Per-player loot
     public Inventory getOrCreateLoot(String chestKey, Player player) {
         ChestData data = registeredChests.get(chestKey);

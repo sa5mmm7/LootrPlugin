@@ -1,9 +1,9 @@
 name: LootrPlugin
 version: ${project.version}
 main: com.fetal.lootr.LootrPlugin
-api-version: '1.21'
+api-version: '26.3'
 description: Per-player unique loot from structure chests with shop plugin compatibility
-author: FeTaL
+authors: [FeTaL, sa5mmm7]
 
 softdepend: 
   - QuickShop-Hikari
@@ -15,7 +15,7 @@ softdepend:
 commands:
   lootr:
     description: LootrPlugin admin commands
-    usage: /<command> [reload|info|stats|clear|reset|list]
+    usage: /<command> [reload|info|stats|clear|reset|list|register|settable|unregister]
     permission: lootr.admin
     aliases: [loot, lr]
 
@@ -29,7 +29,4 @@ permissions:
   lootr.bypass:
     description: Bypass Lootr system
     default: false
-  lootr.use:
-    description: Can use Lootr chests
-    default: true
 

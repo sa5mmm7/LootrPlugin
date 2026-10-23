@@ -101,13 +101,14 @@ public class LootrPlugin extends JavaPlugin {
         lootManager.loadData();
 
         // Register listeners
-        getServer().getPluginManager().registerEvents(new ChestListener(this, lootManager), this);
+        ChestListener chestListener = new ChestListener(this, lootManager);
+        getServer().getPluginManager().registerEvents(chestListener, this);
         getServer().getPluginManager().registerEvents(new ChestProtectionListener(this, lootManager), this);
 
         // Register commands
         PluginCommand cmd = getCommand("lootr");
         if (cmd != null) {
-            LootrCommand executor = new LootrCommand(this, lootManager);
+            LootrCommand executor = new LootrCommand(this, lootManager, chestListener);
             cmd.setExecutor(executor);
             cmd.setTabCompleter(executor);
         }
@@ -118,7 +119,7 @@ public class LootrPlugin extends JavaPlugin {
         // Banner
         printBanner();
 
-        getLogger().info("LootrPlugin enabled! Author: FeTaL");
+        getLogger().info("LootrPlugin enabled! Authors: " + String.join(", ", getDescription().getAuthors()));
     }
 
     private void checkShopPlugins() {
@@ -179,7 +180,7 @@ public class LootrPlugin extends JavaPlugin {
         bypassProtection = config.getBoolean("protection.bypass-protection", true);
 
         particlesEnabled = config.getBoolean("visuals.particles-enabled", true);
-        particleType = config.getString("visuals.particle-type", "VILLAGER_HAPPY");
+        particleType = config.getString("visuals.particle-type", "HAPPY_VILLAGER");
         particlesOnlyUnlooted = config.getBoolean("visuals.particles-only-unlooted", true);
 
         autoSaveInterval = config.getInt("storage.auto-save-interval", 5);

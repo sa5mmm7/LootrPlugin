@@ -59,7 +59,10 @@ public class ChestListener implements Listener {
         Player player = event.getPlayer();
         String chestKey = lootManager.toKey(minecartChest.getLocation());
 
-        if (event.isCancelled()) {
+        // Claim plugins (e.g. GriefPrevention) cancel this. Lootr opens its own per-player inventory, so it can
+        // ignore that for Lootr chests. The event stays cancelled, so the real minecart is never opened.
+        if (event.isCancelled() && !(plugin.isBypassProtection()
+                && (lootManager.isRegistered(chestKey) || minecartChest.getLootTable() != null))) {
             return;
         }
 
@@ -135,7 +138,10 @@ public class ChestListener implements Listener {
 
         String chestKey = lootManager.toKey(block.getLocation());
 
-        // Protection bypass logic
+        // Protection bypass logic: claim plugins (e.g. GriefPrevention) cancel this. Lootr opens its own
+        // per-player inventory, so it can carry on for Lootr chests while leaving the event cancelled.
+        // Anything Lootr ends up not handling (disabled world, vanilla fallback, ...) then stays blocked.
+        boolean bypassedProtection = false;
         if (event.isCancelled() && plugin.isBypassProtection()) {
             boolean isLootr = lootManager.isRegistered(chestKey);
 
@@ -152,13 +158,13 @@ public class ChestListener implements Listener {
                     !isMetadataIgnored(block) && 
                     !isNameIgnored((Container) state)) {
                     
-                    event.setCancelled(false);
+                    bypassedProtection = true;
                     plugin.debug("Bypassed protection for: " + chestKey);
                 }
             }
         }
 
-        if (event.isCancelled()) return;
+        if (event.isCancelled() && !bypassedProtection) return;
 
         Player player = event.getPlayer();
         boolean justRegistered = false;
@@ -260,6 +266,26 @@ public class ChestListener implements Listener {
 
             player.openInventory(inv);
         }
+    }
+
+    /**
+     * Returns why Lootr would skip this container when it is opened, or null if it would not.
+     * Uses the same checks as onChestOpen so manual registration can refuse chests that would never open as Lootr.
+     */
+    public String getIgnoreReason(Block block) {
+        BlockState state = block.getState();
+        if (!(state instanceof Container container)) return null;
+
+        if (plugin.isIgnoreQuickShop() && isQuickShopChest(block)) {
+            return "it is a QuickShop shop (compatibility.ignore-quickshop)";
+        }
+        if (isMetadataIgnored(block)) {
+            return "another plugin has marked it (compatibility.metadata-blacklist)";
+        }
+        if (isNameIgnored(container)) {
+            return "its name \"" + container.getCustomName() + "\" contains an ignored word (compatibility.ignore-chest-names-containing)";
+        }
+        return null;
     }
 
     /**

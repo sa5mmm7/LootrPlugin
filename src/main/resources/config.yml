@@ -6,6 +6,7 @@
 general:
   prefix: "&6[&eLootr&6] &r"
   debug: false
+  # Not used yet: there is no translation system. Player messages can be changed in the messages section below.
   language: "en"
 
 # ═══════════════════════════════════════════
@@ -37,7 +38,6 @@ loot:
     - "lobby"
     - "hub"
     - "spawn"
-  allowed-loot-tables: []
 
 inventory:
   title: "&8[&6✦&8] &eLoot Chest"
@@ -54,15 +54,12 @@ protection:
 
 visuals:
   particles-enabled: true
-  particle-type: "VILLAGER_HAPPY"
+  particle-type: "HAPPY_VILLAGER"
   particles-only-unlooted: true
   particles-exclude-shops: true
-  glow-enabled: false
 
 storage:
   auto-save-interval: 5
-  create-backups: true
-  max-backups: 5
 
 messages:
   first-open: "&aThis chest has unique loot just for you!"
