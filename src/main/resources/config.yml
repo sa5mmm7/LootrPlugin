@@ -30,9 +30,19 @@ compatibility:
     - "§"
   wait-for-quickshop: 5
 
+# Lootr does not create loot tables, it only reads tables the server has loaded.
+# Custom loot tables go in a datapack in your main world's datapacks folder
+# (the folder is printed in the console on startup):
+#   <world>/datapacks/<pack>/data/<namespace>/loot_table/chests/<name>.json
+# Then use them with /lootr register <namespace>:chests/<name>. See the README for details.
 loot:
   per-player-loot: true
   max-tracked-chests: 50000
+  # Tab-complete every vanilla loot table, not just chest and pot tables. Gameplay tables (fishing,
+  # cat gifts) and mob drop tables work in a chest; block and interaction tables don't, and register
+  # and settable refuse them. Some tables are empty (e.g. axolotl drops nothing). See the README.
+  # Any table can still be typed by name with this off.
+  suggest-all-vanilla-tables: false
   disabled-worlds:
     - "creative"
     - "lobby"

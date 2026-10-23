@@ -35,7 +35,12 @@ That means a table works with Lootr if the server has it loaded:
 * **Datapack tables:** any table in an enabled datapack. A file at `world/datapacks/my_loot/data/myserver/loot_table/chests/starter_kit.json` becomes `myserver:chests/starter_kit`.
 * **Tables from other plugins:** these work too, as long as the plugin registers them with the server as real loot tables.
 
-Tab-completion for `register` and `settable` lists the vanilla chest tables and the tables it finds in each world's `datapacks` folder. Tables that are loaded some other way still work, but you have to type their full name.
+Tab-completion for `register` and `settable` lists the vanilla chest and pot tables and the tables it finds in the main world's `datapacks` folder. Tables that are loaded some other way still work, but you have to type their full name. Set `loot.suggest-all-vanilla-tables: true` to also list every other vanilla table. Many of them work in a chest:
+
+* **Gameplay tables**, for example `minecraft:gameplay/fishing/junk`, `minecraft:gameplay/cat_morning_gift` or the Hero of the Village gifts.
+* **Mob drop tables** (`minecraft:entities/...`). They roll as if the player opening the chest had killed the mob. Some mobs drop nothing in vanilla, so their tables are empty: `minecraft:entities/axolotl` gives an empty chest.
+
+`register` and `settable` test-roll the table once before saving it and refuse tables that need information Lootr can't provide, such as block or interaction tables like `minecraft:shearing/carve_pumpkin` or armadillo brushing. The reason is shown in chat. The test only checks that the table can be rolled at all. It doesn't check whether it gives items, so an empty or very sparse table is accepted.
 
 After adding or changing a datapack table, run `/reload` (or restart) so the server loads it, then `/lootr reload` to refresh tab-completion. If a table fails to load, the server logs an error and `/lootr register` reports it as an unknown loot table.
 

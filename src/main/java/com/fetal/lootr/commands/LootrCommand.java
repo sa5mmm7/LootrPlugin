@@ -5,7 +5,6 @@ import com.fetal.lootr.listeners.ChestListener;
 import com.fetal.lootr.manager.LootManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.World;
 import org.bukkit.block.Barrel;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -259,6 +258,7 @@ public class LootrCommand implements CommandExecutor, TabCompleter {
                 return;
             }
         }
+        if (!canFillContainer(sender, lootTable, target, container)) return;
         if (state instanceof Lootable lootable && lootable.getLootTable() != null) {
             lootable.setLootTable(null);
             lootable.setSeed(0);
@@ -289,6 +289,7 @@ public class LootrCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(plugin.getPrefix() + ChatColor.RED + "Unknown loot table: " + args[1]);
             return;
         }
+        if (!canFillContainer(sender, lootTable, target, (Container) target.getState())) return;
 
         lootManager.setChestLootTable(key, lootTable);
         // Old rolls came from the previous table, so drop them
@@ -312,6 +313,15 @@ public class LootrCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(plugin.getPrefix() + ChatColor.GREEN + "Chest is no longer a Lootr chest.");
     }
 
+    // Some tables (block drops, mob drops) need context Lootr can't provide and would fail every time the chest is opened
+    private boolean canFillContainer(CommandSender sender, String lootTable, Block target, Container container) {
+        String problem = lootManager.testLootTable(lootTable, target.getLocation(), (Player) sender, container.getInventory().getSize());
+        if (problem == null) return true;
+
+        sender.sendMessage(plugin.getPrefix() + ChatColor.RED + "Can't use " + lootTable + " in a container: " + problem);
+        return false;
+    }
+
     private Block getTargetContainer(CommandSender sender) {
         if (!(sender instanceof Player)) {
             sender.sendMessage("Players only!");
@@ -333,9 +343,13 @@ public class LootrCommand implements CommandExecutor, TabCompleter {
 
     private Set<String> getLootTableSuggestions() {
         Set<String> tables = new TreeSet<>(getDatapackTables());
+        // Chest and pot tables are chest-type tables, so they always work in a Lootr container.
+        // Others (mob drops, block drops, fishing...) usually need context Lootr can't provide.
         for (LootTables table : LootTables.values()) {
             String key = table.getKey().toString();
-            if (key.startsWith("minecraft:chests/")) tables.add(key);
+            if (plugin.isSuggestAllVanillaTables() || key.startsWith("minecraft:chests/") || key.startsWith("minecraft:pots/")) {
+                tables.add(key);
+            }
         }
         return tables;
     }
@@ -344,11 +358,10 @@ public class LootrCommand implements CommandExecutor, TabCompleter {
         if (datapackTableCache != null) return datapackTableCache;
 
         Set<String> found = new TreeSet<>();
-        for (World world : Bukkit.getWorlds()) {
-            File datapacks = new File(world.getWorldFolder(), "datapacks");
-            File[] packs = datapacks.listFiles();
-            if (packs == null) continue;
-
+        // Datapacks always live in the main world folder. World#getWorldFolder points at a dimension folder on 26.x.
+        File datapacks = Bukkit.getServer().getLevelDirectory().resolve("datapacks").toFile();
+        File[] packs = datapacks.listFiles();
+        if (packs != null) {
             for (File pack : packs) {
                 try {
                     if (pack.isDirectory()) {

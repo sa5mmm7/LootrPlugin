@@ -14,6 +14,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +31,7 @@ public class LootrPlugin extends JavaPlugin {
     private boolean debug;
     private boolean perPlayerLoot;
     private int maxTrackedChests;
+    private boolean suggestAllVanillaTables;
     private List<String> disabledWorlds;
     private String inventoryTitle;
     private boolean playSound;
@@ -124,6 +126,11 @@ public class LootrPlugin extends JavaPlugin {
         // Banner
         printBanner();
 
+        // Where custom loot table datapacks go; Lootr only reads tables the server has loaded from there
+        Path datapacks = getServer().getLevelDirectory().resolve("datapacks");
+        getLogger().info("Loot table datapacks folder: " + getServer().getWorldContainer().toPath().toAbsolutePath()
+                .relativize(datapacks.toAbsolutePath()));
+
         getLogger().info("LootrPlugin enabled! Authors: " + String.join(", ", getDescription().getAuthors()));
     }
 
@@ -172,6 +179,7 @@ public class LootrPlugin extends JavaPlugin {
 
         perPlayerLoot = config.getBoolean("loot.per-player-loot", true);
         maxTrackedChests = config.getInt("loot.max-tracked-chests", 50000);
+        suggestAllVanillaTables = config.getBoolean("loot.suggest-all-vanilla-tables", false);
         disabledWorlds = config.getStringList("loot.disabled-worlds");
         if (disabledWorlds == null) disabledWorlds = new ArrayList<>();
 
@@ -273,6 +281,7 @@ public class LootrPlugin extends JavaPlugin {
     public boolean isDebug() { return debug; }
     public boolean isPerPlayerLoot() { return perPlayerLoot; }
     public int getMaxTrackedChests() { return maxTrackedChests; }
+    public boolean isSuggestAllVanillaTables() { return suggestAllVanillaTables; }
     public boolean isWorldDisabled(String world) { return disabledWorlds.contains(world); }
     public String getInventoryTitle() { return inventoryTitle; }
     public boolean isPlaySound() { return playSound; }

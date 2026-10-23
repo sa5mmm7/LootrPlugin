@@ -192,6 +192,24 @@ public class LootManager {
         }
     }
 
+    /**
+     * Rolls a loot table once into a throwaway inventory, the same way a Lootr chest would.
+     * Returns null if it works, or why it can't fill a container (e.g. a block or mob drop table that needs a tool or killer).
+     */
+    public String testLootTable(String lootTableKey, Location location, Player player, int invSize) {
+        NamespacedKey key = NamespacedKey.fromString(lootTableKey);
+        LootTable lootTable = key != null ? Bukkit.getLootTable(key) : null;
+        if (lootTable == null) return "unknown loot table";
+
+        try {
+            Inventory inv = Bukkit.createInventory(null, invSize);
+            lootTable.fillInventory(inv, new Random(), buildLootContext(location, player));
+            return null;
+        } catch (Exception e) {
+            return e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
+        }
+    }
+
     private LootContext buildLootContext(Location lootLocation, Player player) {
         LootContext.Builder builder = new LootContext.Builder(lootLocation).luck(getPlayerLuck(player));
 
