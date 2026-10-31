@@ -3,7 +3,7 @@ version: ${project.version}
 main: com.fetal.lootr.LootrPlugin
 api-version: '26.3'
 description: Per-player unique loot from structure chests with shop plugin compatibility
-authors: [FeTaL, sa5mmm7]
+authors: [FeTaL]
 
 softdepend: 
   - GriefPrevention
